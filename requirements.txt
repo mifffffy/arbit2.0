@@ -7,6 +7,5 @@ ta-lib-bin
 yfinance
 plotly
 scipy
-ccxt
 time
 requests

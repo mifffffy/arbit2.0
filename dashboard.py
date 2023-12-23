@@ -126,7 +126,14 @@ if option == 'Technical':
 
     if analysis == 'Candlestick Patterns':
         symbol = st.sidebar.text_input('Enter Symbol:', value='BTC', max_chars=None, key=None, type='default')
-        data = yf.download(symbol + '-USD', period='1y', end=None)
+        interval = st.selectbox(label='Select Interval:', options=('5m', '15m', '30m', '1h', '1d', '1wk'), args=None, key=None)
+        if interval == '5m':
+            data = yf.download(symbol + '-USD', period='7d', interval=interval)
+        if interval == '15m':
+            data = yf.download(symbol + '-USD', period='14d', interval=interval)
+        else:
+            start = st.date_input('Start Date', value=pd.to_datetime('today') - pd.to_timedelta('7 days'))
+            data = yf.download(symbol + '-USD', start=start, end=None, interval=interval)
     
     #add patterns to data
 
@@ -195,65 +202,79 @@ if option == 'Technical':
         data_df = pd.DataFrame(data)
         pattern_df = []
         pattern_df = data_df['Two Crows']
-        pattern_df = pd.merge(pattern_df, data_df['Three Black Crows'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Three Inside Up/Down'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Three-Line Strike'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Three Outside Up/Down'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Three Stars In The South'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Three Advancing White Soldiers'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Abandoned Baby'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Advance Block'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Belt-hold'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Breakaway'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Closing Marubozu'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Concealing Baby Swallow'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Counterattack'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Dark Cloud Cover'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Doji'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Doji Star'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Engulfing Pattern'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Evening Doji Star'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Evening Star'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Gap Side-by-Side White Lines'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Gravestone Doji'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Hammer'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Hanging Man'], on=['Date'])
-        pattern_df = pd.merge(pattern_df, data_df['Harami Pattern'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Harami Cross Pattern'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['High-Wave Candle'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Hikkake Pattern'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Modified Hikkake Pattern'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Homing Pigeon'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Identical Three Crows'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['In-Neck Pattern'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Inverted Hammer'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Kicking'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Kicking - Bull/Bear'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Ladder Bottom'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Long Legged Doji'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Long Line Candle'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Marubozu'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Matching Low'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Mat Hold'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Morning Doji Star'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Morning Star'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['On-Neck Pattern'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Piercing Pattern'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Rickshaw Man'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Rising/Falling Three Methods'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Separating Lines'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Shooting Star'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Short Line Candle'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Spinning Top'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Stalled Pattern'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Stick Sandwich'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Takuri'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Tasuki Gap'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Thrusting Pattern'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Tristar Pattern'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Unique 3 River'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Upside Gap Two Crows'], on='Date')
-        pattern_df = pd.merge(pattern_df, data_df['Upside/Downside Gap Three Methods'], on='Date')
+        if interval == '5m':
+            merge = 'Datetime'
+        if interval == '15m':
+            merge = 'Datetime'
+        if interval == '30m':
+            merge = 'Datetime'
+        if interval == '1h':
+            merge = 'Datetime'
+        if interval == '1d':
+            merge = 'Date'
+        if interval == '3d':
+            merge = 'Date'
+        if interval == '1wk':
+            merge = 'Date'
+        pattern_df = pd.merge(pattern_df, data_df['Three Black Crows'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Three Inside Up/Down'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Three-Line Strike'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Three Outside Up/Down'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Three Stars In The South'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Three Advancing White Soldiers'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Abandoned Baby'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Advance Block'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Belt-hold'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Breakaway'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Closing Marubozu'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Concealing Baby Swallow'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Counterattack'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Dark Cloud Cover'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Doji'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Doji Star'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Engulfing Pattern'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Evening Doji Star'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Evening Star'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Gap Side-by-Side White Lines'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Gravestone Doji'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Hammer'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Hanging Man'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Harami Pattern'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Harami Cross Pattern'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['High-Wave Candle'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Hikkake Pattern'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Modified Hikkake Pattern'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Homing Pigeon'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Identical Three Crows'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['In-Neck Pattern'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Inverted Hammer'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Kicking'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Kicking - Bull/Bear'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Ladder Bottom'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Long Legged Doji'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Long Line Candle'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Marubozu'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Matching Low'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Mat Hold'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Morning Doji Star'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Morning Star'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['On-Neck Pattern'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Piercing Pattern'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Rickshaw Man'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Rising/Falling Three Methods'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Separating Lines'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Shooting Star'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Short Line Candle'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Spinning Top'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Stalled Pattern'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Stick Sandwich'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Takuri'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Tasuki Gap'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Thrusting Pattern'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Tristar Pattern'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Unique 3 River'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Upside Gap Two Crows'], on=merge)
+        pattern_df = pd.merge(pattern_df, data_df['Upside/Downside Gap Three Methods'], on=merge)
         
         #days since pattern
         #show when pattern triggered
@@ -281,55 +302,76 @@ if option == 'Technical':
         fig.update_layout(height=1000)
         st.plotly_chart(fig, theme='streamlit', use_container_width=True)
         
-        st.write("Yesterday's Patterns (T-1)")
         last = pattern_df[-2:-1]
         triggered_bullish = last.columns[(last.eq(100)).any()]
         triggered_bearish = last.columns[(last.eq(-100)).any()]
-
-        st.dataframe(triggered_bullish[0:], width=500)
-        st.dataframe(triggered_bearish[0:], width=500)
-
+        bullish, bearish = st.columns(2)
+        with bullish:
+            st.header('Bullish Patterns')
+            st.write("Previous Candle (T-1)")
+            st.dataframe(triggered_bullish, use_container_width=True, hide_index=True)
+        
+        with bearish:
+            st.header('Bearish Patterns')
+            st.write("T is the current candle, T-1 is the previous candle")
+            st.dataframe(triggered_bearish, use_container_width=True, hide_index=True)
+    
         st.write("(T-2)")
         last = pattern_df[-3:-2]
         triggered_bullish = last.columns[(last.eq(100)).any()]
         triggered_bearish = last.columns[(last.eq(-100)).any()]
-
-        st.dataframe(triggered_bullish[0:], width=500)
-        st.dataframe(triggered_bearish[0:], width=500)
+        bullish, bearish = st.columns(2)
+        with bullish:
+            st.dataframe(triggered_bullish, use_container_width=True, hide_index=True)
+        
+        with bearish:
+            st.dataframe(triggered_bearish, use_container_width=True, hide_index=True)
 
         st.write("(T-3)")
         last = pattern_df[-4:-3]
         triggered_bullish = last.columns[(last.eq(100)).any()]
         triggered_bearish = last.columns[(last.eq(-100)).any()]
-
-        st.dataframe(triggered_bullish[0:], width=500)
-        st.dataframe(triggered_bearish[0:], width=500)
+        bullish, bearish = st.columns(2)
+        with bullish:
+            st.dataframe(triggered_bullish, use_container_width=True, hide_index=True)
+        
+        with bearish:
+            st.dataframe(triggered_bearish, use_container_width=True, hide_index=True)
 
         st.write("(T-4)")
         last = pattern_df[-5:-4]
         triggered_bullish = last.columns[(last.eq(100)).any()]
         triggered_bearish = last.columns[(last.eq(-100)).any()]
-
-        st.dataframe(triggered_bullish[0:], width=500)
-        st.dataframe(triggered_bearish[0:], width=500)
+        bullish, bearish = st.columns(2)
+        with bullish:
+            st.dataframe(triggered_bullish, use_container_width=True, hide_index=True)
+        
+        with bearish:
+            st.dataframe(triggered_bearish, use_container_width=True, hide_index=True)
 
         st.write("(T-5)")
         last = pattern_df[-6:-5]
         triggered_bullish = last.columns[(last.eq(100)).any()]
         triggered_bearish = last.columns[(last.eq(-100)).any()]
-
-        st.dataframe(triggered_bullish[0:], width=500)
-        st.dataframe(triggered_bearish[0:], width=500)
+        bullish, bearish = st.columns(2)
+        with bullish:
+            st.dataframe(triggered_bullish, use_container_width=True, hide_index=True)
+        
+        with bearish:
+            st.dataframe(triggered_bearish, use_container_width=True, hide_index=True)
 
         st.write("(T-6)")
         last = pattern_df[-7:-6]
         triggered_bullish = last.columns[(last.eq(100)).any()]
         triggered_bearish = last.columns[(last.eq(-100)).any()]
+        bullish, bearish = st.columns(2)
+        with bullish:
+            st.dataframe(triggered_bullish, use_container_width=True, hide_index=True)
+        
+        with bearish:
+            st.dataframe(triggered_bearish, use_container_width=True, hide_index=True)
 
-        st.dataframe(triggered_bullish[0:], width=500)
-        st.dataframe(triggered_bearish[0:], width=500)
-
-        st.dataframe(pattern_df, width = 1000)
+        st.dataframe(pattern_df, width = 2000)
 
 
 if option == 'Portfolio & Risk Management':

@@ -451,28 +451,6 @@ if option == 'Portfolio & Risk Management':
         fig = px.histogram(returns_plot, x="Adj Close", nbins=150)
         st.plotly_chart(fig, use_container_width=True, theme='streamlit')
 
-    #top 10 line chart
-        top_10_options = st.multiselect('Select Cryptoassets to Compare:', ('BTC-USD','ETH-USD', 'BNB-USD', 'XRP-USD', 'SOL-USD', 'ADA-USD', 'DOT-USD', 'AVAX-USD', 'DOGE-USD', 'TRX-USD', 'MATIC-USD'), default=['BTC-USD', 'ETH-USD', 'BNB-USD'])
-        top_10_data = yf.download(tickers= top_10_options, start=start, end=end)['Adj Close']
-        top_10_df = pd.DataFrame(top_10_data)
-        top_10_relative = top_10_df.pct_change()
-        top_10_cum_ret = (1 + top_10_relative).cumprod() -1
-        top_10_cum_ret = top_10_cum_ret.fillna(0)
-        st.subheader('Cumulative Percentage Returns')
-        st.line_chart(top_10_cum_ret)
-        st.dataframe(top_10_relative, width=1000)
-        
-
-    #top 10 hist
-        top_10_pct_return = top_10_relative[top_10_options] * 100
-        top_10_returns_plot = top_10_pct_return.dropna()
-
-        st.dataframe(top_10_returns_plot.head(), width=1000)
-        top_10_fig = px.histogram(top_10_returns_plot, x=top_10_options, nbins=500, opacity=0.9, barmode='overlay')
-        st.plotly_chart(top_10_fig, use_container_width=True, theme='streamlit')
-
-
-
         #mean returns
         mean_returns = returns['Adj Close'].mean()
         df_returns = pd.DataFrame(returns['Adj Close'])
@@ -483,30 +461,6 @@ if option == 'Portfolio & Risk Management':
         st.write('Mean Annual Return (Crypto): {}%'.format(mean_annual_ret_cry * 100))
         st.write('Mean Annual Return (Stocks): {}%'.format(mean_annual_ret_stock * 100))
         st.write('The mean return is different for Stocks and Crypto because the markets are open different days of the year. Crypto is open 365 days a year, while stocks are open 252 days a year.')
-        
-        #top 10 mean returns
-        top_10_mean_returns = top_10_relative[top_10_options].mean() * 100
-        top_10_description_df = pd.DataFrame(top_10_mean_returns)
-        top_10_description_df.rename(columns={0: 'Mean Daily Returns (%)'}, inplace=True)
-        top_10_description_df['Daily Sigma'] = top_10_relative[top_10_options].std()
-        top_10_description_df['Annual Sigma (Crypto)'] = top_10_description_df['Daily Sigma'] * np.sqrt(365)
-        top_10_description_df['Daily Variance'] = top_10_description_df['Daily Sigma'] ** 2
-        top_10_description_df['Annual Variance (Crypto)'] = top_10_description_df['Annual Sigma (Crypto)'] ** 2
-        top_10_clean = top_10_relative[top_10_options].dropna()
-        top_10_description_df['Skew'] = skew(top_10_clean)
-        top_10_description_df['Excess Kurtosis'] = kurtosis(top_10_clean.dropna())
-        top_10_description_df['Fourth Moment'] = top_10_description_df['Excess Kurtosis'] + 3
-        numpy_arrays = [top_10_clean[column_name].to_numpy() for column_name in top_10_options]
-        for column_name, numpy_array in zip(top_10_options, numpy_arrays):
-            statistic, p_value = shapiro(numpy_array)
-            top_10_description_df.at[column_name, 'Shapiro-Wilk Test Statistic'] = statistic
-            top_10_description_df.at[column_name, 'Shapiro-Wilk Test P-Value'] = p_value
-            st.write(f"Shapiro-Wilk Test for {column_name}: p-value = {p_value}")
-            st.write(f"Shapiro-Wilk Test for {column_name}: statistic = {statistic}")
-
-        st.dataframe(top_10_description_df, width=1500)
-       
-
         #standard deviation and variance
         daily_sigma = np.std(returns['Adj Close'])
         st.write('Daily Standard Deviation: {}'.format(daily_sigma))
@@ -540,6 +494,53 @@ if option == 'Portfolio & Risk Management':
         p_value = shapiro_results[1]
         st.write('P-Value:', p_value)
 
+    #top 10 line chart
+        top_10_options = st.multiselect('Select Cryptoassets to Compare:', ('BTC-USD','ETH-USD', 'BNB-USD', 'XRP-USD', 'SOL-USD', 'ADA-USD', 'DOT-USD', 'AVAX-USD', 'DOGE-USD', 'TRX-USD', 'MATIC-USD'), default=['BTC-USD', 'ETH-USD', 'BNB-USD'])
+        top_10_data = yf.download(tickers= top_10_options, start=start, end=end)['Adj Close']
+        top_10_df = pd.DataFrame(top_10_data)
+        top_10_relative = top_10_df.pct_change()
+        top_10_cum_ret = (1 + top_10_relative).cumprod() -1
+        top_10_cum_ret = top_10_cum_ret.fillna(0)
+        st.subheader('Cumulative Percentage Returns')
+        st.line_chart(top_10_cum_ret)
+        
+
+    #top 10 hist
+        top_10_pct_return = top_10_relative[top_10_options] * 100
+        top_10_returns_plot = top_10_pct_return.dropna()
+        st.subheader('Recent Percentage Returns')
+        day_select = st.slider('Select Number of Days:', min_value=1, max_value=365, value=10, step=1)
+        st.dataframe(top_10_returns_plot.tail(day_select), width=2000)
+        bins= st.slider('Resolution:', min_value=50, max_value=500, value=100, step=10)
+        top_10_fig = px.histogram(top_10_returns_plot, x=top_10_options, nbins=bins, opacity=0.9, barmode='overlay')
+        st.plotly_chart(top_10_fig, use_container_width=True, theme='streamlit')
+        
+        #top 10 mean returns
+        top_10_mean_returns = top_10_relative[top_10_options].mean() * 100
+        top_10_description_df = pd.DataFrame(top_10_mean_returns)
+        top_10_description_df.rename(columns={0: 'Mean Daily Returns (%)'}, inplace=True)
+        top_10_description_df['Daily Sigma'] = top_10_relative[top_10_options].std()
+        top_10_description_df['Annual Sigma (Crypto)'] = top_10_description_df['Daily Sigma'] * np.sqrt(365)
+        top_10_description_df['Daily Variance'] = top_10_description_df['Daily Sigma'] ** 2
+        top_10_description_df['Annual Variance (Crypto)'] = top_10_description_df['Annual Sigma (Crypto)'] ** 2
+        top_10_clean = top_10_relative[top_10_options].dropna()
+        top_10_description_df['Skew'] = skew(top_10_clean)
+        top_10_description_df['Excess Kurtosis'] = kurtosis(top_10_clean.dropna())
+        top_10_description_df['Fourth Moment'] = top_10_description_df['Excess Kurtosis'] + 3
+        numpy_arrays = [top_10_clean[column_name].to_numpy() for column_name in top_10_options]
+        for column_name, numpy_array in zip(top_10_options, numpy_arrays):
+            statistic, p_value = shapiro(numpy_array)
+            top_10_description_df.at[column_name, 'Shapiro-Wilk Test Statistic'] = statistic
+            top_10_description_df.at[column_name, 'Shapiro-Wilk Test P-Value'] = p_value
+        st.subheader('Statistics & Ratios')
+        st.dataframe(top_10_description_df, width=1500)
+        st.write('Mean: The average value of a set of numbers')
+        st.write('Standard Deviation (Sigma): A measure of how spread out numbers are')
+        st.write('Variance: A measure of how far each number in a dataset is from the mean')
+        st.write('Skew: Indicates whether a distribution is asymmetrically tails weighted. A positive skew has a longer, fatter tail to the right, while a negative skew has a longer, fatter tail to the left. In trading, we want a postive skew as this means the asset trends up over time.')
+        st.write('Excess Kurtosis: A measure of how heavy-tailed a distribution is compared to a normal distribution - positive excess kurtosis indicates heavier tails and peakiness relative to a normal distribution, while negative excess kurtosis indicates lighter tails and flatness.')
+        st.write('Fourth Moment: A high fourth moment value indicates that a distribution has heavier tails and a higher peak compared to a normal distribution. This is also known as positive excess kurtosis.')
+        st.write('The Shapiro-Wilk statistic: A test statistic used in the Shapiro-Wilk test to check for normality of a data sample. It tests the null hypothesis that the data was drawn from a normally distributed population. The statistic W is calculated from the ordered sample values. If W is close to 1, it indicates the data is likely from a normal distribution. Small values of W indicate departure from normality.')
         #even weighted portfolio
         port_weights = np.array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1 ,0.1, 0.1, 0.1, 0.1])
         #backtesting

@@ -25,7 +25,7 @@ if option == 'Technical':
 
         st.subheader('Momentum Dashboard')
         st.write("The Momentum Heatmap shows a variety of momentum indicators, which have then been normalised. This means that they are easier to compare. A score of 1, dark blue, means that indicator is at its maximum value, for the given time frame. Note that some indicators have negative values whilst others don't.")
-        st.write("The final column shows the total, which is the sum of all the indicators, again normailised to it's maximum value. This is intended as a very quick summary of momentum broadly."
+        st.write("The final column shows the total, which is the sum of all the indicators, again normailised to it's maximum value. This is intended as a very quick summary of momentum broadly.")
         symbol = st.sidebar.text_input('Enter Symbol:', value='BTC', max_chars=None, key=None, type='default')
         data = yf.download(symbol + '-USD', period='1y', end=None)
 

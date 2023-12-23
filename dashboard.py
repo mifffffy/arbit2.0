@@ -8,7 +8,6 @@ import plotly.express as px
 import scipy.stats as stats
 from scipy.stats import skew, kurtosis, shapiro
 import requests
-import ccxt.async_support as ccxt
 from pip._internal import main as install
 install(["install","ta-lib"])
 import talib

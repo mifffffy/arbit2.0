@@ -26,10 +26,16 @@ if option == 'Technical':
         st.subheader('Momentum Dashboard')
         st.write("The Momentum Heatmap shows a variety of momentum indicators, which have then been normalised. This means that they are easier to compare. A score of 1, dark blue, means that indicator is at its maximum value, for the given time frame. Note that some indicators have negative values whilst others don't.")
         st.write("The final column shows the total, which is the sum of all the indicators, again normailised to it's maximum value. This is intended as a very quick summary of momentum broadly.")
-        symbol = st.sidebar.text_input('Enter Symbol:', value='BTC', max_chars=None, key=None, type='default')
-        start = st.date_input('Start Date', value=pd.to_datetime('2023-01-01'))
-        end = st.date_input('End Date', value=pd.to_datetime('today'))
-        data = yf.download(symbol + '-USD', start=start, end=end)
+        symbol = st.text_input('Enter Symbol:', value='BTC', max_chars=None, key=None, type='default')
+        interval = st.selectbox(label='Select Interval:', options=('5m', '15m', '30m', '1h', '1d', '1wk'), args=None, key=None)
+        if interval == '5m':
+            data = yf.download(symbol + '-USD', period='7d', interval=interval)
+        if interval == '15m':
+            data = yf.download(symbol + '-USD', period='14d', interval=interval)
+        else:
+            start = st.date_input('Start Date', value=pd.to_datetime('today') - pd.to_timedelta('7 days'))
+            data = yf.download(symbol + '-USD', start=start, end=None, interval=interval)
+        
 
     #add momentum indicators to data 
 
@@ -55,32 +61,47 @@ if option == 'Technical':
         data['TRIX'] = talib.TRIX(data['Close'], timeperiod=30)
         data['ULTOSC'] = talib.ULTOSC(data['High'], data['Low'], data['Close'], timeperiod1=7, timeperiod2=14, timeperiod3=28)
         data['WILLR'] = talib.WILLR(data['High'], data['Low'], data['Close'], timeperiod=14)
+        
     #convert to dataframe
+        if interval == '5m':
+            merge = 'Datetime'
+        if interval == '15m':
+            merge = 'Datetime'
+        if interval == '30m':
+            merge = 'Datetime'
+        if interval == '1h':
+            merge = 'Datetime'
+        if interval == '1d':
+            merge = 'Date'
+        if interval == '3d':
+            merge = 'Date'
+        if interval == '1wk':
+            merge = 'Date'
         data_df = pd.DataFrame(data)
         btc_mom_df = []
         btc_mom_df = data_df['RSI']
-        btc_mom_df = pd.merge(btc_mom_df, data_df['ADX'], on='Date')
-        btc_mom_df = pd.merge(btc_mom_df, data_df['ADXR'], on='Date')
-        btc_mom_df = pd.merge(btc_mom_df, data_df['APO'], on='Date')
-        btc_mom_df = pd.merge(btc_mom_df, data_df['AROONOSC'], on='Date')
-        btc_mom_df = pd.merge(btc_mom_df, data_df['BOP'], on='Date')
-        btc_mom_df = pd.merge(btc_mom_df, data_df['CCI'], on='Date')
-        btc_mom_df = pd.merge(btc_mom_df, data_df['CMO'], on='Date')
-        btc_mom_df = pd.merge(btc_mom_df, data_df['DX'], on='Date')
-        btc_mom_df = pd.merge(btc_mom_df, data_df['MACD'], on='Date')
-        btc_mom_df = pd.merge(btc_mom_df, data_df['MACDsignal'], on='Date')
-        btc_mom_df = pd.merge(btc_mom_df, data_df['MACDhist'], on='Date')
-        btc_mom_df = pd.merge(btc_mom_df, data_df['MFI'], on='Date')
-        btc_mom_df = pd.merge(btc_mom_df, data_df['MINUS_DI'], on='Date')
-        btc_mom_df = pd.merge(btc_mom_df, data_df['MINUS_DM'], on='Date')
-        btc_mom_df = pd.merge(btc_mom_df, data_df['MOM'], on='Date')
-        btc_mom_df = pd.merge(btc_mom_df, data_df['PLUS_DI'], on='Date')
-        btc_mom_df = pd.merge(btc_mom_df, data_df['PLUS_DM'], on='Date')
-        btc_mom_df = pd.merge(btc_mom_df, data_df['PPO'], on='Date')
-        btc_mom_df = pd.merge(btc_mom_df, data_df['ROC'], on='Date')
-        btc_mom_df = pd.merge(btc_mom_df, data_df['ROCP'], on='Date')
-        btc_mom_df = pd.merge(btc_mom_df, data_df['TRIX'], on='Date')
-        btc_mom_df = pd.merge(btc_mom_df, data_df['ULTOSC'], on='Date')
+        btc_mom_df = pd.merge(btc_mom_df, data_df['ADX'], on=merge)
+        btc_mom_df = pd.merge(btc_mom_df, data_df['ADXR'], on=merge)
+        btc_mom_df = pd.merge(btc_mom_df, data_df['APO'], on=merge)
+        btc_mom_df = pd.merge(btc_mom_df, data_df['AROONOSC'], on=merge)
+        btc_mom_df = pd.merge(btc_mom_df, data_df['BOP'], on=merge)
+        btc_mom_df = pd.merge(btc_mom_df, data_df['CCI'], on=merge)
+        btc_mom_df = pd.merge(btc_mom_df, data_df['CMO'], on=merge)
+        btc_mom_df = pd.merge(btc_mom_df, data_df['DX'], on=merge)
+        btc_mom_df = pd.merge(btc_mom_df, data_df['MACD'], on=merge)
+        btc_mom_df = pd.merge(btc_mom_df, data_df['MACDsignal'], on=merge)
+        btc_mom_df = pd.merge(btc_mom_df, data_df['MACDhist'], on=merge)
+        btc_mom_df = pd.merge(btc_mom_df, data_df['MFI'], on=merge)
+        btc_mom_df = pd.merge(btc_mom_df, data_df['MINUS_DI'], on=merge)
+        btc_mom_df = pd.merge(btc_mom_df, data_df['MINUS_DM'], on=merge)
+        btc_mom_df = pd.merge(btc_mom_df, data_df['MOM'], on=merge)
+        btc_mom_df = pd.merge(btc_mom_df, data_df['PLUS_DI'], on=merge)
+        btc_mom_df = pd.merge(btc_mom_df, data_df['PLUS_DM'], on=merge)
+        btc_mom_df = pd.merge(btc_mom_df, data_df['PPO'], on=merge)
+        btc_mom_df = pd.merge(btc_mom_df, data_df['ROC'], on=merge)
+        btc_mom_df = pd.merge(btc_mom_df, data_df['ROCP'], on=merge)
+        btc_mom_df = pd.merge(btc_mom_df, data_df['TRIX'], on=merge)
+        btc_mom_df = pd.merge(btc_mom_df, data_df['ULTOSC'], on=merge)
         
         #clear blank rows
         btc_mom_df = btc_mom_df.dropna()

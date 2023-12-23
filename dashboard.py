@@ -397,66 +397,29 @@ if option == 'Technical':
 
 if option == 'Portfolio & Risk Management':
     #get crypto data
-    btc = yf.download("BTC-USD", period='1y', end=None)
-    eth = yf.download("ETH-USD", period='1y', end=None)
-    bnb = yf.download("BNB-USD", period='1y', end=None)
-    xrp = yf.download("XRP-USD", period='1y', end=None)
-    sol = yf.download("SOL-USD", period='1y', end=None)
-    ada = yf.download("ADA-USD", period='1y', end=None)
-    dot = yf.download("DOT-USD", period='1y', end=None)
-    avax = yf.download("AVAX-USD", period='1y', end=None)
-    doge = yf.download("DOGE-USD", period='1y', end=None)
-    tron = yf.download("TRX-USD", period='1y', end=None)
-    matic = yf.download("MATIC-USD", period='1y', end=None)
-    
-    #convert to dataframe
-    btc_df = pd.DataFrame(btc)
-    eth_df = pd.DataFrame(eth)
-    bnb_df = pd.DataFrame(bnb)
-    xrp_df = pd.DataFrame(xrp)
-    sol_df = pd.DataFrame(sol)
-    ada_df = pd.DataFrame(ada)
-    dot_df = pd.DataFrame(dot)
-    avax_df = pd.DataFrame(avax)
-    doge_df = pd.DataFrame(doge)
-    tron_df = pd.DataFrame(tron)
-    matic_df = pd.DataFrame(matic)
-
     risk = st.sidebar.selectbox('Select Analysis:', ('Correlation', 'Performance'))
     if risk == 'Correlation':
         st.subheader('Top 10 Cryptoasset Correlation')
-        #correlation heatmap
-        corr_df = []
-        corr_df = btc_df['Close']
-        corr_df = pd.DataFrame(corr_df)
-        corr_df.rename(columns={'Close': 'Bitcoin'}, inplace=True)
-        corr_df['Ethereum'] = eth_df['Close']
-        corr_df['BNB'] = bnb_df['Close']
-        corr_df['XRP'] = xrp_df['Close']
-        corr_df['Solana'] = sol_df['Close']
-        corr_df['Cardano'] = ada_df['Close']
-        corr_df['Polkadot'] = dot_df['Close']
-        corr_df['Avalanche'] = avax_df['Close']
-        corr_df['Dogecoin'] = doge_df['Close']
-        corr_df['Tron'] = tron_df['Close']
-        corr_df['Polygon'] = matic_df['Close']
-
-        corr_df['Date'] = corr_df.index
-        corr_df = corr_df.set_index('Date')
-        corr_matrix = corr_df.corr()
-        fig = px.imshow(corr_matrix,
-                        x=corr_matrix.columns,
-                        y=corr_matrix.columns,
+        start = st.date_input('Start Date', value=pd.to_datetime('2023-01-01'))
+        end = st.date_input('End Date', value=pd.to_datetime('today'))
+        top_10_options = st.multiselect('Select Cryptoassets to Compare:', ('BTC-USD','ETH-USD', 'BNB-USD', 'XRP-USD', 'SOL-USD', 'ADA-USD', 'DOT-USD', 'AVAX-USD', 'DOGE-USD', 'TRX-USD', 'MATIC-USD'), default=['BTC-USD', 'ETH-USD', 'BNB-USD'])
+        top_10_data = yf.download(tickers= top_10_options, start=start, end=end)['Adj Close']
+        top_10_data['Date'] = top_10_data.index
+        top_10_data = top_10_data.set_index('Date')
+        top_10_data_matrix = top_10_data.corr()
+        fig = px.imshow(top_10_data_matrix,
+                        x=top_10_data_matrix.columns,
+                        y=top_10_data_matrix.columns,
                         color_continuous_scale='RdBu',
                         color_continuous_midpoint=1, range_color=(-1, 1),
                         title='Correlation Heatmap between Crypto Prices')
 
-
-        fig_corr = px.imshow(corr_matrix, color_continuous_scale='RdBu',
+        size= st.slider('Select Size:', min_value=700, max_value=2000, value=1000, step=50)
+        fig_corr = px.imshow(top_10_data_matrix, color_continuous_scale='RdBu', height = size, width=size,
                         color_continuous_midpoint=1, range_color=(-1, 1), text_auto=True)
 
         st.plotly_chart(fig_corr, theme='streamlit', use_container_width=True, size=10000)
-        st.dataframe(corr_df, width=1000)
+        st.dataframe(top_10_data_matrix, width=2000)
 
     if risk == 'Performance':
         st.subheader('Compare Asset Performance')

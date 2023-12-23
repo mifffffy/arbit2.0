@@ -1,0 +1,12 @@
+streamlit
+pandas
+plotly
+requests
+numpy
+ta-lib-bin
+yfinance
+plotly
+scipy
+ccxt
+time
+requests
